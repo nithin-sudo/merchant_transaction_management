@@ -1,0 +1,400 @@
+{% extends 'merchant_tran_mgmt_app/base.html' %}
+
+{% block title %}Create User{% endblock %}
+
+{% block content %}
+
+<style>
+    .short-field {
+        max-width: 400px;
+    }
+    
+    button.btn-primary {
+        background-color: #4b0082;
+        border-color: #4b0082;
+    }
+    
+    button.btn-primary:hover {
+        background-color: #370061;
+        border-color: #370061;
+    }
+    
+/* Ensure password-wrapper aligns with short-field */
+.password-wrapper {
+    position: relative;
+    max-width: 400px; /* Match the width of .short-field */
+    width: 100%;
+}
+
+.password-wrapper input {
+    width: 100%; /* Ensure the input takes full width */
+    padding-right: 2.5rem; /* Reserve space for the eye icon */
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.75rem; /* Adjust for alignment within .short-field */
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #6c757d; /* Icon color */
+    font-size: 0.75rem; /* Adjust icon size */
+}
+
+.password-info-icon {
+    position: absolute;
+    top: 50%;
+    right: 2.5rem; /* Adjust this based on the toggle eye icon */
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #6c757d; /* Info icon color */
+    font-size: 1rem;
+}
+
+#admin-tab,#merchant-tab{
+    color: #370061;
+}
+
+.custom-margin {
+    margin-right: 320px; /* Adjust the value as needed */
+}
+
+
+    </style>
+    
+
+    <div class="tabs">
+        <ul class="nav nav-tabs" id="userTabs">
+            <li class="nav-item">
+                <a class="nav-link active" id="admin-tab" data-bs-toggle="tab" href="#admin" role="tab">Create Admin User</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="merchant-tab" data-bs-toggle="tab" href="#merchant" role="tab">Create Merchant User</a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="tab-content mt-3">
+        <!-- Admin User Form -->
+        <div class="tab-pane fade show active" id="admin" role="tabpanel">
+            <form id="adminUserForm" method="POST" action="{% url 'create_user' %}">
+                {% csrf_token %}
+                <div class="form-group mb-3">
+                    <label for="username">Username <span class="text-danger">*</span></label>
+                    <input type="text" id="username" name="username" class="form-control short-field" placeholder="Enter Username" required>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="email">Email <span class="text-danger">*</span></label>
+                    <input type="email" id="email" name="email" class="form-control short-field" placeholder="Enter e-mail" required>
+                </div>
+    
+                <div class="form-group mb-4">
+                    <label for="password">Password <span class="text-danger">*</span></label>
+                    <div class="password-wrapper">
+                        <input
+                            type="password"
+                            id="admin-password"
+                            name="password"
+                            class="form-control short-field"
+                            placeholder="Enter Password"
+                            required
+                        >
+                        <span class="password-toggle" onclick="toggleAdminPasswordVisibility()">
+                            <i id="admin-eye-icon" class="fas fa-eye"></i>
+                        </span>
+                        <span
+                            class="password-info-icon"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            title="Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character."
+                        >
+                            <i class="fas fa-info-circle"></i>
+                        </span>
+                    </div>
+                </div>
+    
+                <button type="submit" class="btn btn-primary">Create Admin User</button>
+            </form>
+        </div>
+    
+        <!-- Merchant User Form -->
+        <div class="tab-pane fade" id="merchant" role="tabpanel">
+            <form id="merchantUserForm" method="POST" action="{% url 'create_merchant_user' %}">
+                {% csrf_token %}
+                <div class="row">
+                    <!-- Left Column -->
+                    <div class="col-md-5">
+                        <div class="form-group mb-3">
+                            <label for="merchant-username">Username <span class="text-danger">*</span></label>
+                            <input type="text" id="merchant-username" name="username" class="form-control short-field" placeholder="Enter Username" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="merchant-email">Email <span class="text-danger">*</span></label>
+                            <input type="email" id="merchant-email" name="email" class="form-control short-field" placeholder="Enter e-mail" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="merchant-password">Password <span class="text-danger">*</span></label>
+                            <div class="password-wrapper">
+                                <input
+                                    type="password"
+                                    id="merchant-password"
+                                    name="password"
+                                    class="form-control short-field"
+                                    placeholder="Enter Password"
+                                    required
+                                >
+                                <span class="password-toggle" onclick="toggleMerchantPasswordVisibility()">
+                                    <i id="merchant-eye-icon" class="fas fa-eye"></i>
+                                </span>
+                                <span
+                                    class="password-info-icon"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character."
+                                >
+                                    <i class="fas fa-info-circle"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="business-name">Business Name <span class="text-danger">*</span></label>
+                            <input type="text" id="business-name" name="business_name" class="form-control short-field" placeholder="Enter Business Name" required>
+                        </div>
+                    </div>
+        
+                    <!-- Right Column -->
+                    <div class="col-md-5">
+                        <div class="form-group mb-3">
+                            <label for="street">Street <span class="text-danger">*</span></label>
+                            <input type="text" id="street" name="street" class="form-control short-field" placeholder="Enter Street" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="city">City <span class="text-danger">*</span></label>
+                            <input type="text" id="city" name="city" class="form-control short-field" placeholder="Enter City" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="state">State <span class="text-danger">*</span></label>
+                            <select id="state" name="state" class="form-control short-field" required>
+                                <option value="">Select State</option>
+                                {% for state in states %}
+                                    <option value="{{ state.code }}">{{ state.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="zip-code">Zip Code <span class="text-danger">*</span></label>
+                            <input type="text" id="zip-code" name="zip_code" class="form-control short-field" placeholder="Enter Zip Code" required>
+                        </div>
+                    </div>
+                </div>
+        
+                <!-- Centered Button -->
+                <div class="text-center mt-4 custom-margin">
+                    <button type="submit" class="btn btn-primary">Create Merchant User</button>
+                </div>
+            </form>
+        </div>
+        </div>
+    
+<script>
+
+        function toggleAdminPasswordVisibility() {
+            const passwordInput = document.getElementById('admin-password');
+            const eyeIcon = document.getElementById('admin-eye-icon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash'); // Change icon to eye-slash
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye'); // Change icon back to eye
+            }
+        }
+
+
+
+    $(document).ready(function () {
+        $('[data-bs-toggle="tooltip"]').tooltip();
+    });
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+    const tooltipTriggerList = [].slice.call(
+        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    );
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+
+
+    document.getElementById("adminUserForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    // Clear previous errors
+    clearFormErrors(form);
+
+    fetch(form.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+        },
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw response; // Throw the response to handle errors in .catch()
+            }
+            return response.json();
+        })
+        .then((data) => {
+            // If no errors, show success Swal and reset form
+            Swal.fire("Success!", "Admin user created successfully.", "success");
+            form.reset(); // Reset the form fields
+        })
+        .catch(async (response) => {
+            if (response.json) {
+                const data = await response.json();
+                if (data.errors) {
+                    showFormErrors(form, data.errors);
+                }
+            } else {
+                console.error("Error:", response);
+            }
+        });
+    });
+
+/**
+ * Clears all previous error messages and invalid classes from the form.
+ */
+function clearFormErrors(form) {
+    const invalidElements = form.querySelectorAll(".is-invalid");
+    invalidElements.forEach((element) => {
+        element.classList.remove("is-invalid");
+    });
+
+    const feedbackElements = form.querySelectorAll(".invalid-feedback");
+    feedbackElements.forEach((feedback) => feedback.remove());
+}
+
+/**
+ * Displays errors for each field dynamically on the form.
+ */
+ function showFormErrors(form, errors) {
+    // Map backend field names to form field IDs
+    const fieldMapping = {
+        username: "username",
+        email: "email",
+        password: "admin-password", // Map 'password' to 'admin-password'
+    };
+
+    for (const [field, error] of Object.entries(errors)) {
+        const fieldId = fieldMapping[field]; // Get the mapped field ID
+        const input = form.querySelector(`#${fieldId}`);
+        if (input) {
+            input.classList.add("is-invalid");
+            input.insertAdjacentHTML(
+                "afterend",
+                `<div class="invalid-feedback">${error}</div>`
+            );
+        }
+    }
+}
+
+
+
+
+document.getElementById("merchantUserForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    // Clear previous errors
+    clearFormErrors(form);
+
+    fetch(form.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+        },
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw response; // Throw the response to handle errors in .catch()
+            }
+            return response.json();
+        })
+        .then((data) => {
+            // If no errors, show success Swal and reset form
+            Swal.fire("Success!", "Merchant user created successfully.", "success");
+            form.reset(); // Reset the form fields
+        })
+        .catch(async (response) => {
+            if (response.json) {
+                const data = await response.json();
+                if (data.errors) {
+                    showMerchantFormErrors(form, data.errors); // Use the new function
+                }
+            } else {
+                console.error("Error:", response);
+            }
+        });
+});
+
+
+
+
+/**
+ * Displays errors for each field dynamically on the Merchant User form.
+ */
+ function showMerchantFormErrors(form, errors) {
+    // Map backend field names to form field IDs for Merchant User form
+    const fieldMapping = {
+        username: "merchant-username",
+        email: "merchant-email",
+        password: "merchant-password", // Map 'password' to 'merchant-password'
+        business_name: "business-name",
+        street: "street",
+        city: "city",
+        state: "state",
+        zip_code: "zip-code",
+    };
+
+    for (const [field, error] of Object.entries(errors)) {
+        const fieldId = fieldMapping[field]; // Get the mapped field ID
+        const input = form.querySelector(`#${fieldId}`);
+        if (input) {
+            input.classList.add("is-invalid");
+            input.insertAdjacentHTML(
+                "afterend",
+                `<div class="invalid-feedback">${error}</div>`
+            );
+        }
+    }
+}
+
+
+function toggleMerchantPasswordVisibility() {
+            const passwordInput = document.getElementById('merchant-password');
+            const eyeIcon = document.getElementById('merchant-eye-icon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash'); // Change icon to eye-slash
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye'); // Change icon back to eye
+            }
+        }
+</script>
+
+{% endblock %}

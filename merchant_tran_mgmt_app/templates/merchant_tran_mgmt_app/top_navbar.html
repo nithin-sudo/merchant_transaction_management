@@ -1,0 +1,75 @@
+<!-- Top Navigation Bar -->
+<nav class="navbar custom-navbar">
+    <div class="container-fluid">
+        <!-- Left Section -->
+        <div class="navbar-left">
+            <span class="navbar-brand">Quick Pay</span>
+        </div>
+
+        <!-- Right Section -->
+        <div class="navbar-right">
+            <ul class="navbar-nav">
+                <!-- Add Icons/Links Here -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fa fa-bell"></i></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fa fa-envelope"></i></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fa fa-user-circle"></i></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+    
+
+<style>
+
+    /* Navbar Styling */
+.custom-navbar {
+    background-color: #6a1b9a; /* Your default color */
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #4a148c; /* Optional bottom border */
+}
+
+/* Navbar Left Section */
+.navbar-left .navbar-brand {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: white;
+    text-transform: uppercase; /* Makes 'MTM' uppercase */
+}
+
+/* Navbar Right Section */
+.navbar-right {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-right .nav-item {
+    margin-left: 20px;
+}
+
+.navbar-right .nav-link {
+    color: white;
+    font-size: 1.2rem;
+    transition: color 0.3s;
+}
+
+.navbar-right .nav-link:hover {
+    color: #e0e0e0; /* Hover color */
+}
+
+/* Optional styling for icons */
+.navbar-right .fa {
+    font-size: 1.5rem;
+}
+
+</style>

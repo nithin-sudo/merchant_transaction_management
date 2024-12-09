@@ -1,0 +1,75 @@
+<!-- Add Order Details Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6><strong>Order Reference:</strong> <span id="modal-order-reference"></span></h6>
+                <h6><strong>Customer Name:</strong> <span id="modal-customer-name"></span></h6>
+                <h6><strong>Merchant Name:</strong> <span id="modal-merchant-name"></span></h6>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="order-details-table-body">
+                    </tbody>
+                </table>
+                <h5 class="text-end">Total: <span id="modal-total-amount"></span></h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Attach a click event listener to the order reference link
+    $(document).on('click', '.order-details-link', function (e) {
+        e.preventDefault();
+
+        const orderId = $(this).data('id'); // Get the order ID from the link
+
+        // Fetch order details via AJAX
+        $.ajax({
+            url: `/orders/${orderId}/details/`, // Backend endpoint
+            method: 'GET',
+            success: function (data) {
+                // Populate modal fields
+                $('#modal-order-reference').text(data.order_reference);
+                $('#modal-customer-name').text(data.customer_name);
+                $('#modal-merchant-name').text(data.merchant_name);
+                $('#modal-total-amount').text(`$${data.total_amount.toFixed(2)}`);
+
+                // Populate table rows
+                const tbody = $('#order-details-table-body');
+                tbody.empty(); // Clear the table body
+                data.details.forEach(detail => {
+                    tbody.append(`
+                        <tr>
+                            <td>${detail.product_name}</td>
+                            <td>${detail.quantity}</td>
+                            <td>$${detail.price.toFixed(2)}</td>
+                            <td>$${detail.subtotal.toFixed(2)}</td>
+                        </tr>
+                    `);
+                });
+
+                // Show the modal
+                $('#orderDetailsModal').modal('show');
+            },
+            error: function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to fetch order details. Please try again later.'
+                });
+            }
+        });
+    });
+</script>

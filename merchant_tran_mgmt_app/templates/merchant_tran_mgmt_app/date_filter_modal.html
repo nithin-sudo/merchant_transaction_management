@@ -1,0 +1,215 @@
+<!-- Button to Open Filter Modal -->
+<div class="d-flex justify-content-end mb-3">
+    <button type="button" class="btn btn-primary" id="filter_orders" data-bs-toggle="modal" data-bs-target="#dateFilterModal">
+        Filter Orders
+    </button>
+    <button type="button" class="btn btn-secondary d-none ms-2" id="clear_filters">
+        Clear Filters
+    </button>
+</div>
+<style>
+
+select.form-control {
+    -webkit-appearance: menulist;
+    -moz-appearance: menulist;
+    appearance: menulist; /* Ensures the dropdown arrow is visible */
+    background-color: #fff; /* Background color */
+    border: 1px solid #ccc; /* Border */
+    border-radius: 4px; /* Rounded corners */
+    padding: 8px; /* Padding inside the dropdown */
+    font-size: 1rem; /* Font size */
+    width: 100%; /* Full width */
+    color: #333; /* Text color */
+}
+
+.form-label {
+    font-weight: bold; /* Make labels bold for better visibility */
+}
+
+
+</style>
+
+<!-- Date Filter Modal -->
+<div class="modal fade" id="dateFilterModal" tabindex="-1" aria-labelledby="dateFilterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dateFilterModalLabel">Filter Orders</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+          <!-- Merchant Filter (Admin Only) -->
+                {% if request.session.user_role == 'super-admin' %}
+                <div class="form-group mb-3">
+                    <label for="merchant-select" class="form-label">Merchant</label>
+                    <select id="merchant-select" class="form-control">
+                        <option value="">Select a Merchant</option>
+                        {% for merchant in merchants %}
+                        <option value="{{ merchant.merchant_id }}">{{ merchant.business_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+
+                <!-- Start Date -->
+                <div class="form-group mb-3">
+                    <label for="start-date" class="form-label">Start Date</label>
+                    <input type="text" id="start-date" class="form-control datepicker" placeholder="Select Start Date">
+                    <div id="start-date-error" class="text-danger small d-none">Start date is mandatory.</div>
+                </div>
+
+                <!-- End Date -->
+                <div class="form-group mb-3">
+                    <label for="end-date" class="form-label">End Date</label>
+                    <input type="text" id="end-date" class="form-control datepicker" placeholder="Select End Date">
+                    <div id="end-date-error" class="text-danger small d-none">End date is mandatory.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="apply-filters-btn">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    #apply-filters-btn {
+        background-color: #644fa1; /* Replace with your dashboard's primary color */
+        border-color: #5C4B90;    /* Same color for the border */
+    }
+
+    #apply-filters-btn:hover {
+        background-color: #251947; /* Slightly darker shade for hover */
+        border-color: #4A3A75;
+    }
+</style>
+
+<script>
+
+    /*$(document).ready(function () {
+    // Initialize Select2 for #merchant-select
+        $("#merchant-select").select2({
+            placeholder: 'Select a Merchant',
+            allowClear: true,
+            minimumInputLength: 1, // Only query after user types 1+ characters
+            ajax: {
+                url: "/get_merchants/", // Backend endpoint to fetch merchants
+                type: "GET",
+                dataType: 'json',
+                processResults: function (data) {
+                    
+                    return {
+                        results: data.results.map(function (merchant) {
+                            return { id: merchant.id, text: merchant.text };
+                        }),
+                    };
+                },
+                error: function (xhr) {
+                    console.error("Error fetching merchants:", xhr);
+                },
+            },
+
+        });
+    }); */
+
+
+        // Initialize Datepicker for start and end dates
+        $('.datepicker').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true,
+            todayHighlight: true,
+        });
+
+        // Open the Filter Modal
+        $('#open-filter-modal-btn').on('click', function () {
+            $('#dateFilterModal').modal('show');
+        });
+
+        // Apply Filters Button
+        $('#apply-filters-btn').on('click', function () {
+            const startDate = $('#start-date').val();
+            const endDate = $('#end-date').val();
+            const merchantId = $('#merchant-select').val(); // For admin only
+            let isValid = true;
+
+            // Validation
+            if (!startDate) {
+                $('#start-date-error').removeClass('d-none').text('Start date is required.');
+                isValid = false;
+            } else {
+                $('#start-date-error').addClass('d-none');
+            }
+
+            if (!endDate) {
+                $('#end-date-error').removeClass('d-none').text('End date is required.');
+                isValid = false;
+            } else {
+                $('#end-date-error').addClass('d-none');
+            }
+
+            if (!isValid) return; // Stop execution if validation fails
+
+            // Show Swal loading indicator
+            Swal.fire({
+                title: 'Applying Filters...',
+                text: 'Please wait while we filter the orders.',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading(); // Show loading spinner
+
+                    // Update the DataTable's AJAX URL dynamically
+                    const table = $('#orders-table').DataTable();
+                    const filters = {
+                        start_date: startDate,
+                        end_date: endDate,
+                        merchant_id: merchantId,
+                    };
+
+                    table.ajax.url("/filter_orders/?" + $.param(filters)).load(() => {
+                        setTimeout(() => {
+                            // Hide the modal
+                            $('#dateFilterModal').modal('hide');
+                            // Close Swal loading indicator
+                            Swal.close();
+                            // Show the Clear Filters button
+                            $('#clear_filters').removeClass('d-none');
+                        },1000);
+                        
+                    });
+
+                    // Handle any errors (optional)
+                    table.on('error.dt', function (e, settings, techNote, message) {
+                        console.error('DataTables error: ', message);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to filter orders. Please try again.',
+                        });
+                    });
+                }
+            });
+        });
+
+
+       
+        $('#clear_filters').on('click', function () {
+            // Show the Swal with loading spinner
+            Swal.fire({
+                title: 'Resetting Filters...',
+                text: 'Please wait while we refresh the page.',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading(); // Show loading spinner
+                    setTimeout(() => {
+                        location.reload(); // Reload page
+                    }, 1000);
+                }
+            });
+});
+
+
+
+</script>

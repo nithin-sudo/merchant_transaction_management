@@ -1,0 +1,231 @@
+    /* General Styling */
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        display: flex;
+        height: 100vh;
+    }
+
+    /* Sidebar Styling */
+    .sidebar {
+        width: 220px;
+        background-color: #7a4b94; /* Light purple */
+        color: white;
+        padding: 20px;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .sidebar h2 {
+        text-align: center;
+        font-size: 20px;
+        margin-bottom: 20px;
+        color: #fff;
+    }
+
+    .sidebar ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .sidebar ul li {
+        margin: 15px 0;
+    }
+
+    .sidebar ul li a {
+        color: white;
+        text-decoration: none;
+        font-size: 18px;
+        display: block;
+        padding: 10px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    .sidebar ul li a:hover {
+        background-color: #310746; /* Darker purple on hover */
+    }
+
+    /* Logout Button */
+    .logout {
+        margin-top: auto; /* Push to bottom */
+        text-align: center;
+        padding: 10px;
+    }
+
+    .logout a {
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+        display: block;
+        padding: 10px;
+        background-color: #ff4d4d; /* Red for logout */
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    .logout a:hover {
+        background-color: #e60000; /* Darker red on hover */
+    }
+
+    /* Main Content Styling */
+    .main-content {
+        flex: 1;
+        padding: 20px;
+        background-color: white;
+        overflow-y: auto;
+    }
+
+
+    /* Sidebar Header */
+.sidebar-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.sidebar-logo {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 10px; /* Center the logo and add space below */
+}
+
+.sidebar-header h2 {
+    font-size: 20px;
+    color: white;
+    margin: 0;
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid white; /* Slightly darker purple for separation */
+    margin: 10px 0;
+}
+
+.sidebar ul li.active a {
+    background-color: #450a61; /* Slightly darker purple for the active tab */
+    font-weight: bold;
+}
+
+
+.edit-btn {
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.edit-btn:hover {
+    background-color: #160a2f !important; /* Darker shade for hover */
+}
+
+
+
+
+/* SweetAlert2 custom popup styling */
+.swal2-popup {
+    width: 400px !important; /* Adjust width */
+    font-size: 1rem !important; /* Adjust font size */
+    padding: 5px !important; /* Add padding */
+    border-radius: 5px !important; /* Round corners */
+}
+
+.swal2-title {
+    font-size: 1.5rem !important; /* Customize title font size */
+    font-weight: bold !important; /* Make title bold */
+    color: #4a148c !important; /* Match your dashboard color */
+}
+
+.swal2-content {
+    font-size: 1rem !important; /* Customize text font size */
+    color: #333 !important; /* Darker content text */
+}
+
+.swal2-confirm {
+    background-color: #6a1b9a !important; /* Match dashboard color */
+    color: #fff !important; /* White text */
+    border: none !important;
+    border-radius: 5px !important;
+    padding: 10px 20px !important;
+    font-size: 1rem !important;
+    font-weight: bold !important;
+}
+
+.swal2-cancel {
+    background-color: #bdbdbd !important; /* Grey for cancel */
+    color: #fff !important; /* White text */
+    border: none !important;
+    border-radius: 5px !important;
+    padding: 10px 20px !important;
+    font-size: 1rem !important;
+}
+
+.swal2-backdrop-show {
+    background-color: rgba(0, 0, 0, 0.6) !important; /* Set a proper dark overlay */
+    z-index: 1050 !important;
+}   
+
+/* Prevent scrolling when the popup is shown */
+body.swal2-shown {
+    overflow: hidden !important;
+}
+
+/* Fix z-index issues with the modal and backdrop */
+.swal2-container {
+    z-index: 1060 !important; /* Ensure it appears on top of all elements */
+}
+
+    /* Top Navbar */
+.top-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #7a4b94; /* Replace with your brand color */
+    color: white;
+    padding: 10px 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: 70px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+    padding: 10px;
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.nav-icon {
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.navbar-right .nav-icon {
+    margin-right: 15px; /* Add space between icons */
+}
+
+.navbar-right .nav-icon:last-child {
+    margin-right: 0; /* Remove margin from the last icon */
+}
+
+/* Adjust main content for fixed top navbar */
+.main-content {
+    margin-top: 60px; /* Adjust for the height of the top navbar */
+}
+

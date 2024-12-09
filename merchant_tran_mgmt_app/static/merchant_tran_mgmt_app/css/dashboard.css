@@ -1,0 +1,176 @@
+/* Modal Overlay */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Modal Content */
+.modal-content {
+    background-color: #fff;
+    color: #555;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Check Icon */
+.modal-icon {
+    font-size: 50px;
+    color: #4caf50; /* Green for success */
+    margin-bottom: 20px;
+}
+
+/* Heading */
+.modal-content h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #7a4b94; /* Match login button purple */
+    margin-bottom: 20px;
+}
+
+.close-btn {
+    background-color: #7a4b94;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    background-color: #6b3f80;
+}
+
+
+/* General Metric Card Styles */
+.metric-card {
+    padding: 7px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    margin: 1px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.2s ease-in-out;
+    position: relative;
+}
+
+.metric-card:hover {
+    transform: translateY(-3px);
+}
+
+/* Align icons with cards */
+.metric-card .metric-icon {
+    font-size: 2.5rem; /* Adjust icon size */
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* Metric Value */
+.metric-value {
+    font-size: 1.8rem; /* Larger numbers */
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+/* Short Field Styles */
+.short-field {
+    max-width: 300px;
+    width: 100%;
+}
+
+/* Dropdown Styles */
+#merchant-select {
+    max-width: 250px; /* Shorter width */
+    display: inline-block;
+    margin-bottom: 0; /* Reduce gap */
+}
+
+/* Label Styles */
+#filters-section .form-label {
+    font-weight: bold;
+    font-size: 1rem; /* Slightly larger text */
+}
+
+/* Total Orders Card */
+.metric-card.total-orders {
+    background-color: #e6d9f8; /* Light Purple */
+    border-left: 5px solid #6c63ff; /* Dark Purple border */
+    color: #6c63ff; /* Purple text */
+}
+
+.metric-card.total-orders .metric-value {
+    color: #387bc2; /* Blue for numbers */
+}
+
+.metric-card.total-orders .metric-icon {
+    color: #6c63ff; /* Purple for the icon */
+}
+
+/* Total Sales Card */
+.metric-card.total-sales {
+    background-color: #fff4cc; /* Light Gold */
+    border-left: 5px solid #ffaf00; /* Gold border */
+    color: #ffaf00; /* Gold text */
+}
+
+.metric-card.total-sales .metric-value {
+    color: #ffaf00; /* Gold for numbers */
+}
+
+.metric-card.total-sales .metric-icon {
+    color: #ffaf00; /* Gold for the icon */
+}
+
+/* Total Customers Card */
+.metric-card.total-customers {
+    background-color: #d0f0f3; /* Light Teal */
+    border-left: 5px solid #007b8a; /* Teal border */
+    color: #007b8a; /* Teal text */
+}
+
+.metric-card.total-customers .metric-value {
+    color: #007b8a; /* Teal for numbers */
+}
+
+.metric-card.total-customers .metric-icon {
+    color: #007b8a; /* Teal for the icon */
+}
+
+/* Ensure all cards align properly */
+.row.text-center {
+    justify-content: center;
+    align-items: center;
+}
+
+.metric-card h4 {
+    font-weight: bold; /* Bold headings */
+    margin-bottom: 1rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .metric-card {
+        margin-bottom: 1rem;
+    }
+}
+
+.no-data-message {
+    font-size: 1.5rem; /* Bigger font size */
+    color: #007bff; /* Blue font color */
+    text-align: center; /* Center the text horizontally */
+    margin-top: 50px; /* Add spacing from the top */
+    font-weight: bold; /* Make the text bold */
+}

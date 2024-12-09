@@ -1,0 +1,253 @@
+{% extends 'merchant_tran_mgmt_app/base.html' %}
+
+{% block title %}Orders{% endblock %}
+
+{% block content %}
+<h1 style="font-weight: bold; color: #6a1b9a;" class="order-heading">Orders</h1>
+
+{% include 'merchant_tran_mgmt_app/date_filter_modal.html' %}
+
+<!-- Orders Table -->
+<table id="orders-table" class="display">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Order Reference</th>
+            <th>Merchant Name</th>
+            <th>Customer Name</th>
+            <th>Order Amount</th>
+            <th>Order Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+</table>
+<style>
+    .order-details-link {
+    text-decoration: none;
+    color: rgb(16, 102, 135); /* Optional: Makes the text color inherit the default color */
+}
+
+.order-details-link:hover {
+    text-decoration: underline; /* Optional: Adds an underline on hover */
+    color: #6a1b9a; /* Optional: Changes color on hover to match your dashboard theme */
+}
+
+.order-heading {
+    margin-bottom: 40px; /* Adjust the value as needed */
+}
+
+</style>
+
+<!-- Include the Order Details Modal -->
+{% include 'merchant_tran_mgmt_app/order_details.html' %}
+
+
+
+<!-- Edit Order Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="editModalLabel">Edit Order</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-order-id" name="order_id">
+
+                <!-- Order Reference (readonly) -->
+                <div class="mb-3">
+                    <label for="edit-order-reference" class="form-label">Order Reference</label>
+                    <input type="text" class="form-control" id="edit-order-reference" name="order_reference" disabled>
+                </div>
+
+                <!-- Merchant Name (readonly) -->
+                <div class="mb-3">
+                    <label for="edit-merchant-name" class="form-label">Merchant Name</label>
+                    <input type="text" class="form-control" id="edit-merchant-name" name="merchant_name" disabled>
+                </div>
+
+                <!-- Customer Name (readonly) -->
+                <div class="mb-3">
+                    <label for="edit-customer-name" class="form-label">Customer Name</label>
+                    <input type="text" class="form-control" id="edit-customer-name" name="customer_name" disabled>
+                </div>
+
+                <!-- Order Amount (readonly) -->
+                <div class="mb-3">
+                    <label for="edit-order-amount" class="form-label">Order Amount</label>
+                    <input type="text" class="form-control" id="edit-order-amount" name="order_amount" disabled>
+                </div>
+
+                <!-- Order Status (editable) -->
+                <div class="mb-3">
+                    <label for="edit-order-status" class="form-label">Order Status</label>
+                    <select class="form-select" id="edit-order-status" name="status">
+                        <option value="Pending">Pending</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="save-changes-btn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    /* Bold the column names (labels) */
+    #editModal .modal-body .form-label {
+        font-weight: bold;
+    }
+
+    /* Match the "Save Changes" button color to the dashboard */
+    #save-changes-btn,#filter_orders {
+        background-color: #644fa1; /* Replace with your dashboard's primary color */
+        border-color: #5C4B90;    /* Same color for the border */
+    }
+
+    #save-changes-btn:hover {
+        background-color: #4A3A75; /* Slightly darker shade for hover */
+        border-color: #4A3A75;
+    }
+</style>
+
+<script>
+$(document).ready(function () {
+    console.log("Initializing DataTable");
+
+    // Initialize the DataTable
+    $('#orders-table').DataTable({
+        processing: true,  // Show processing indicator
+        serverSide: true,  // Enable server-side processing
+        ajax: {
+            url: "{% url 'orders_data' %}",  // Backend endpoint
+        },
+        pageLength: 5,  // Start with 5 records per page
+        lengthMenu: [5, 10, 15, 25,50], 
+        columns: [
+            { data: 'order_id', title: 'Order ID' },
+            { 
+            data: 'order_reference', 
+            title: 'Order Reference',
+            render: function(data, type, row) {
+                return `<a href="#" class="order-details-link" data-id="${row.order_id}">${data}</a>`;
+            }
+            },
+            { data: 'merchant__business_name', title: 'Merchant Name' },
+            { data: 'customer__first_name', title: 'Customer Name' },
+            { data: 'order_amount', title: 'Order Amount' },
+            { data: 'status', title: 'Order Status' },
+            { data: 'created_at', title: 'Date' },
+            {
+                data: null,  // Action column, no direct field
+                title: 'Actions',
+                orderable: false,  // Disable sorting for this column
+                searchable: false,  // Disable searching for this column
+                render: function (data, type, row) {
+                    // Add Edit button
+                    return `
+                        <button class="btn btn-sm btn-primary edit-btn" 
+                                data-id="${row.order_id}" 
+                                style="background-color: #6f42c1; color: white; border: none;">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                    `;
+                }
+            }
+        ]
+    });
+
+    // Handle the Edit button click
+    $('#orders-table').on('click', '.edit-btn', function () {
+        const orderId = $(this).data('id');  // Get the order ID from the button
+
+        // Fetch order details via AJAX
+        $.ajax({
+            url: `/orders/get_order/${orderId}/`,  // Backend endpoint
+            method: 'GET',
+            success: function (data) {
+                // Populate modal fields
+                $('#edit-order-id').val(data.order_id);
+                $('#edit-order-reference').val(data.order_reference);
+                $('#edit-merchant-name').val(data.merchant_name);
+                $('#edit-customer-name').val(data.customer_name);
+                $('#edit-order-amount').val(data.order_amount);
+                $('#edit-order-status').val(data.status);
+
+                // Show the modal
+                $('#editModal').modal('show');
+            },
+            error: function (error) {
+                console.error("Error fetching order data:", error);
+
+                // Show SweetAlert error
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Failed to fetch order details. Please try again later.',
+                });
+            }
+        });
+    });
+});
+
+
+$(document).ready(function () {
+    // Save Changes button click handler
+    $('#save-changes-btn').click(function () {
+        const orderId = $('#edit-order-id').val(); // Get the order ID
+        const status = $('#edit-order-status').val(); // Get the new status
+
+        // Make an AJAX POST request to update the order
+        $.ajax({
+            url: `/orders/${orderId}/update/`,  // Endpoint for updating the order
+            method: 'POST',
+            data: {
+                status: status,  // Send the updated status
+                csrfmiddlewaretoken: '{{ csrf_token }}'  // Include CSRF token
+            },
+            success: function (response) {
+                // Show success message using SweetAlert
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Updated!',
+                    text: response.message,
+                    customClass: {
+                        popup: 'swal2-popup',
+                        title: 'swal2-title',
+                        content: 'swal2-content',
+                        confirmButton: 'swal2-confirm',
+                        cancelButton: 'swal2-cancel',
+                        backdrop: 'swal2-backdrop-show'
+                    },
+                });
+
+                // Close the modal
+                $('#editModal').modal('hide');
+
+                // Reload the DataTable to reflect the changes
+                $('#orders-table').DataTable().ajax.reload();
+            },
+            error: function (xhr) {
+                // Show error message using SweetAlert
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: xhr.responseJSON.message || 'Failed to update the order!',
+                });
+            }
+        });
+    });
+    
+});
+
+
+
+</script>
+
+{% endblock %}

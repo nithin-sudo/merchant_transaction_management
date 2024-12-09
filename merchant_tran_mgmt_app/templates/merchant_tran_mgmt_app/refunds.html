@@ -1,0 +1,52 @@
+{% extends 'merchant_tran_mgmt_app/base.html' %}
+
+{% block title %}Refunds{% endblock %}
+
+{% block content %}
+<h1 style="font-weight: bold; color: #6a1b9a;" class="heading">Refunds</h1>
+<table id="refunds-table" class="display">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Order Reference</th>
+            <th>Product Name</th>
+            <th>Merchant Name</th>
+            <th>Customer Name</th>
+            <th>Quantity</th>
+            <th>Amount</th> 
+            <th>Date</th>
+        </tr>
+    </thead>
+</table>
+
+<style>
+.heading {
+    margin-bottom: 80px; /* Adjust the value as needed */
+}
+</style>
+
+<script>
+    $(document).ready(function () {
+        // Initialize the DataTable
+        $('#refunds-table').DataTable({
+            processing: true,  // Show processing indicator
+            serverSide: true,  // Enable server-side processing
+            ajax: {
+                url: "{% url 'refunds_data' %}",  // Backend endpoint
+            },
+            pageLength: 5,  // Start with 5 records per page
+            lengthMenu: [5, 10, 15, 25,50], 
+            columns: [
+                { data: 'order__order_id', title: 'Order ID' },
+                { data: 'order__order_reference', title: 'Order Reference' },
+                { data: 'product__product_name', title: 'Product Name' },
+                { data: 'order__merchant__business_name', title: 'Merchant Name' },
+                { data: 'order__customer__first_name', title: 'Customer Name' },
+                { data: 'quantity', title: 'Quantity' },
+                { data: 'price', title: 'Amount' }, // New Column
+                { data: 'created_at', title: 'Date' }
+            ]
+        });
+    });
+</script>
+{% endblock %}

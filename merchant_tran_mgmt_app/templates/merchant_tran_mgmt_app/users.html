@@ -1,0 +1,391 @@
+{% extends 'merchant_tran_mgmt_app/base.html' %}
+
+{% block title %}Users{% endblock %}
+
+{% block content %}
+<h1 style="font-weight: bold; color: #6a1b9a;" class="user-heading">Users</h1>
+<table id="users-table" class="display">
+    <thead>
+        <tr>
+            <th>User ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Created At</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+</table>
+<style>
+    .user-heading {
+    margin-bottom: 90px; /* Adjust the value as needed */
+}
+</style>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="changePasswordForm">
+                    <input type="hidden" id="user-id" name="user_id"> <!-- Hidden field for user ID -->
+                    
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" id="username" name="username" class="form-control" disabled>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="new-password" class="form-label">New Password</label>
+                        <div class="input-group">
+                            <input 
+                                type="password" 
+                                id="new-password" 
+                                name="new_password" 
+                                class="form-control" 
+                                placeholder="Enter New Password" 
+                                required>
+                            <button 
+                                type="button" 
+                                class="btn btn-outline-secondary password-toggle-new" 
+                                onclick="toggleConfirmPasswordVisibility('new-password', 'eye-icon-new')">
+                                <i id="eye-icon-new" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirm-password" class="form-label">Confirm Password</label>
+                        <div class="input-group">
+                            <input 
+                                type="password" 
+                                id="confirm-password" 
+                                name="confirm_password" 
+                                class="form-control" 
+                                placeholder="Confirm New Password" 
+                                required>
+                            <button 
+                                type="button" 
+                                class="btn btn-outline-secondary password-toggle-confirm" 
+                                onclick="toggleConfirmPasswordVisibility('confirm-password', 'eye-icon-confirm')">
+                                <i id="eye-icon-confirm" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="reset" class="btn btn-warning">Reset</button>
+                        <button type="submit" class="btn btn-primary">Change Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+$(document).ready(function () {
+    $('#users-table').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "{% url 'users_data' %}", // Endpoint for fetching data
+            type: "GET",
+        },
+        pageLength: 5, // Start with 5 records per page
+        lengthMenu: [5, 10, 15, 25, 50],
+        columns: [
+            { data: 'user_id', title: 'User ID' },
+            { data: 'username', title: 'Username' },
+            { data: 'email', title: 'Email' },
+            { data: 'role', title: 'Role' },
+            { data: 'created_at', title: 'Date' },
+            {
+                data: 'actions',
+                title: 'Actions',
+                orderable: false,
+                searchable: false,
+                render: function (data, type, row) {
+                    // Start with Delete button (visible for all users)
+                    let actions = `
+                        <button class="btn btn-link btn-sm btn-delete" 
+                            data-id="${row.user_id}" 
+                            title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+
+                    // Add Change Password button (visible for all users)
+                    actions += `
+                        <button class="btn btn-warning btn-sm btn-change-password"
+                            data-id="${row.user_id}"
+                            data-username="${row.username}" 
+                            title="Change Password">
+                            <i class="fas fa-key"></i>
+                        </button>
+
+                    `;
+
+                    // Add Activate/Deactivate or No Action buttons for merchants
+                    if (row.role.toLowerCase() === 'merchant') {
+                        if (row.active === 'Y') {
+                            // Merchant is active; show Deactivate button
+                            actions = `
+                                <button class="btn btn-danger btn-sm btn-toggle-status"
+                                    data-id="${row.user_id}" 
+                                    data-status="deactivate">
+                                    Deactivate
+                                </button>
+                            ` + actions; // Append other buttons
+                        } else if (row.active === 'N') {
+                            // Merchant is inactive; show Activate button
+                            actions = `
+                                <button class="btn btn-success btn-sm btn-toggle-status"
+                                    data-id="${row.user_id}" 
+                                    data-status="activate">
+                                    Activate
+                                </button>
+                            ` + actions; // Append other buttons
+                        } else {
+                            // If no active status, show No Action button
+                            actions = `
+                                <button class="btn btn-secondary btn-sm" disabled>
+                                    No Action
+                                </button>
+                            ` + actions; // Append other buttons
+                        }
+                    } else {
+                        // For non-merchants, show No Action button
+                        actions = `
+                            <button class="btn btn-secondary btn-sm" disabled>
+                                No Action
+                            </button>
+                        ` + actions; // Append other buttons
+                    }
+
+                    return actions; // Return the combined buttons
+                },
+            },
+        ]
+    });
+
+
+
+    // Event delegation for the toggle status button
+    $('#users-table').on('click', '.btn-toggle-status', function () {
+        const userId = $(this).data('id');
+        const action = $(this).data('status');
+        console.log(userId)
+        console.log(action)
+        Swal.fire({
+            title: `Are you sure you want to ${action} this Merchant?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, confirm!',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Send the AJAX request to update user status
+                fetch(`/update-merchant-status/${userId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val(),
+                    },
+                    body: JSON.stringify({ action }),
+                })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data)
+                    Swal.fire('Success', `Merchant has been ${action}d successfully.`, 'success');
+                    $('#users-table').DataTable().ajax.reload(); // Reload DataTable
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'Failed to update user status.', 'error');
+                });
+            }
+        });
+    });
+
+    // Event listener for Delete button
+$('#users-table').on('click', '.btn-delete', function () {
+    const userId = $(this).data('id'); // Get the user ID
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'This action will permanently delete the user!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Perform DELETE request
+            fetch(`/delete-user/${userId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(), // Add CSRF token if needed
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.error) {
+                        Swal.fire('Error', data.error, 'error');
+                    } else {
+                        Swal.fire('Deleted!', data.message, 'success');
+                        $('#users-table').DataTable().ajax.reload(); // Reload DataTable
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'Something went wrong while deleting the user.', 'error');
+                });
+        }
+    });
+});
+
+// Helper function to get CSRF token from cookies
+function getCSRFToken() {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith('csrftoken=')) {
+            return cookie.substring('csrftoken='.length, cookie.length);
+        }
+    }
+    return '';
+}
+
+
+    // Event listener for triggering the Change Password modal
+    $('#users-table').on('click', '.btn-change-password', function () {
+        const userId = $(this).data('id'); // Get user ID from the button's data attribute
+        const username = $(this).data('username'); // Get username from the button's data attribute
+
+        // Populate the modal fields
+        $('#changePasswordModal #username').val(username); // Set the username
+        $('#changePasswordModal #username').prop('disabled', true); // Disable the username field
+        $('#changePasswordModal #user-id').val(userId); // Store the user ID in a hidden field
+
+        // Clear any existing errors or input
+        $('#changePasswordModal #new-password').val('');
+        $('#changePasswordModal #confirm-password').val('');
+        $('#changePasswordModal .invalid-feedback').remove();
+        $('#changePasswordModal .is-invalid').removeClass('is-invalid');
+
+        // Show the modal
+        $('#changePasswordModal').modal('show');
+    });
+
+    function toggleNewPasswordVisibility(inputId, iconId) {
+    const passwordField = document.getElementById(inputId);
+    const eyeIcon = document.getElementById(iconId);
+
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordField.type = 'password';
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');
+    }
+}
+
+});
+
+
+function toggleConfirmPasswordVisibility(inputId, iconId) {
+    const passwordField = document.getElementById(inputId);
+    const eyeIcon = document.getElementById(iconId);
+
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordField.type = 'password';
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');
+    }
+}
+
+document.getElementById("changePasswordForm").addEventListener("submit", function (e) {
+    e.preventDefault(); // Prevent default form submission
+
+    const form = e.target;
+    //const userId = form.getAttribute("user-id"); // User ID from the modal
+    const userId = document.getElementById("user-id").value;
+    const newPassword = document.getElementById("new-password").value;
+    const confirmPassword = document.getElementById("confirm-password").value;
+
+    console.log(userId,newPassword,confirmPassword)
+    // Clear previous errors
+    clearPasswordErrors();
+
+    // Make an AJAX request
+    fetch(`/change-password/${userId}/`, {
+        method: "POST",
+        body: JSON.stringify({ newPassword, confirmPassword }),
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}" // Pass CSRF token for security
+        }
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw response; // Handle errors
+            }
+            return response.json();
+        })
+        .then((data) => {
+            // Success: Clear form, close modal, and show success Swal
+            Swal.fire("Success!", "Password changed successfully.", "success");
+            $("#changePasswordModal").modal("hide"); // Close the modal
+            form.reset(); // Clear the form inputs
+        })
+        .catch(async (errorResponse) => {
+            // Handle validation errors from backend
+            const errorData = await errorResponse.json();
+            if (errorData.error) {
+                showPasswordError(errorData.error); // Display error
+            } else {
+                console.error("Unexpected error:", errorResponse);
+            }
+        });
+});
+
+/**
+ * Clear all error messages and invalid classes.
+ */
+function clearPasswordErrors() {
+    const errorDiv = document.querySelector(".password-error");
+    if (errorDiv) errorDiv.remove();
+    const inputs = document.querySelectorAll(".is-invalid");
+    inputs.forEach((input) => input.classList.remove("is-invalid"));
+}
+
+/**
+ * Show error under the Confirm Password field.
+ */
+function showPasswordError(message) {
+    const confirmPasswordInput = document.getElementById("confirm-password");
+    confirmPasswordInput.classList.add("is-invalid");
+    confirmPasswordInput.insertAdjacentHTML(
+        "afterend",
+        `<div class="invalid-feedback password-error">${message}</div>`
+    );
+}
+
+
+</script>
+{% endblock %}
